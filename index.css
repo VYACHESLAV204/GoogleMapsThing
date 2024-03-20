@@ -16,7 +16,7 @@ body {
     background-color: #b9b9b9;
 }
 
-.panel{
+.panel {
     width: 100%;
     padding: 1rem 5rem;
     display: flex;
@@ -24,10 +24,10 @@ body {
     justify-content: space-between;
 }
 
-.nav_container{
+.nav_container {
     display: flex;
     flex-direction: row;
-    align-items: center ;
+    align-items: center;
     gap: 1.5rem;
 }
 
@@ -36,7 +36,7 @@ body {
     width: 90%;
 }
 
-button{
+button {
     background-color: hsl(240, 2%, 39%);
     height: 2rem;
     display: inline-flex;
@@ -47,4 +47,28 @@ button{
     border: none;
     color: white;
     cursor: pointer;
+}
+
+input {
+    display: flex;
+    height: 2rem;
+    width: 400px;
+    border-radius: 8px;
+    padding: 0.75rem 0.55rem;
+    background-color: #fff;
+    font-family: Roboto;
+    font-size: 15px;
+    font-weight: 500;
+    margin-left: 50px;
+}
+
+/* ыфвыфв */
+
+.pac-controls {
+    display: inline-block;
+    padding: 5px 11px;
+}
+
+#pac-input:focus {
+    border-color: #4d90fe;
 }
