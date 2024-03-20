@@ -27,14 +27,14 @@ async function initMap() {
   directionsRenderer.setMap(map);
 
   let infoWindow = new google.maps.InfoWindow({
-    content: "Укажите начальную и конечную точки маршрута нажимая на дорогу, появятся маркеры которые можно перетаскивать. Для изменения пути маршрута нажмита на его линию, и перетащите появившеюся точку на нужный вам поворот. Так можно делать сколько угодно раз.",
+    content: "Укажите начальную и конечную точки маршрута нажимая на дорогу, появятся маркеры которые можно перетаскивать. Для изменения пути маршрута нажмите на его линию, и перетащите появившеюся точку на нужный вам поворот. Так можно делать сколько угодно раз. После нажмите кнопку \"Отправить Данные\" в верхнем правом углу.",
     position: defPos,
   });
 
 
   infoWindow.open(map);
-  // Слушатель кликов
-  map.addListener("click", (mapsMouseEvent) => {
+  // Слушатель кликов для отображения координатов
+/*   map.addListener("click", (mapsMouseEvent) => {
     // Close the current InfoWindow.
     infoWindow.close();
     // Create a new InfoWindow.
@@ -45,7 +45,7 @@ async function initMap() {
       JSON.stringify(mapsMouseEvent.latLng.toJSON(), null, 2),
     );
     infoWindow.open(map);
-  });
+  }); */
 
   start_point.addEventListener("click", (e) => {
     map.panTo(start)
@@ -80,7 +80,7 @@ function calculateAndDisplayRoute(directionsService, directionsRenderer) {
         travelMode: google.maps.TravelMode.DRIVING,
       }).then((res) => {
         console.log(res)
-/*         let data = JSON.stringify(res.) */
+        alert("Данные были отправлены.")
       }).catch((e) => {console.log("Error: " + e)})
   })
 }
