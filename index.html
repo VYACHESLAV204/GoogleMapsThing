@@ -25,13 +25,18 @@
     </div>
 
     <div class="nav_container">
-      <button id="reset_turns">Сбросить повоороты</button>
-      <button id="reset_route">Сбросить весь маршрут</button>
       <button id="submit">Отправить Данные</button>
     </div>
   </div>
   <div id="map"></div>
-
+  <h1 class="error_msg">Если вы видите это сообщение, значит карта не загрузилась, попробуйте перезагрузить страницу (возможно несколько раз). Если проблема не ичезнет сообщите нам об ошибке</h1>
+  <div class="modal" id="modal">
+    <h1>Переустановить точки маршрута?</h1>
+    <div class="modal_nav">
+      <button id="close_modal">Отмена</button>
+      <button id="submit_modal">Подтвердить</button>
+    </div>
+  </div>
   <script src="https://polyfill.io/v3/polyfill.min.js?features=default" defer></script>
 </body>
 
