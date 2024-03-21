@@ -1,18 +1,25 @@
 //@ts-nocheck
+/* Да, всё этого пиздец как плохо выглядит */
 let map;
+let totalDistance
+let totalTime
+let start_cords
+let end_cords
 const start_point = document.getElementById("start_point")
 const end_point = document.getElementById("end_point")
 const reset_turns = document.getElementById("reset_turns")
 const reset_route = document.getElementById("reset_route")
 const submitBtn = document.getElementById("submit")
+let modal = document.getElementById("modal")
+let close_modal = document.getElementById("close_modal")
+let submit_modal = document.getElementById("submit_modal")
 
-var start = { lat: 56.82919264514929, lng: 60.58379842794948 };
-var end = { lat: 56.82953942977743, lng: 60.59075440792031 };
+let start = { lat: 56.82919264514929, lng: 60.58379842794948 };
+let end = { lat: 56.82953942977743, lng: 60.59075440792031 };
 
 async function initMap() {
   const { Map } = await google.maps.importLibrary("maps");
   const directionsService = new google.maps.DirectionsService();
-
   let directionsRenderer = new google.maps.DirectionsRenderer({
     draggable: true,
     map,
@@ -28,14 +35,13 @@ async function initMap() {
   directionsRenderer.setMap(map);
 
   let tooltipInfoWindow = new google.maps.InfoWindow({
-    content: "Укажите начальную и конечную точки маршрута нажимая на дорогу, появятся маркеры которые можно перетаскивать. Для изменения пути маршрута нажмите на его линию, и перетащите появившеюся точку на нужный вам поворот. Так можно делать сколько угодно раз. После нажмите кнопку \"Отправить Данные\" в верхнем правом углу.",
+    content: "Укажите начальную и конечную точки маршрута нажимая на дорогу, появятся 2 маркера которые можно перетаскивать: маркер \"A\" - Начало маршрута, маркер \"Б\" - конец маршрута. Для изменения пути маршрута нажмите на его линию, и перетащите появившеюся точку на нужный вам поворот. Так можно делать сколько угодно раз. После нажмите кнопку \"Отправить Данные\" в верхнем правом углу.",
     position: defPos,
   });
 
-
   tooltipInfoWindow.open(map);
   // Слушатель кликов для отображения координатов
-  // Лучше оставить, закоментированным конечно.
+  // Лучше оставить, закоментированным конечно, может ещё пригодиться.
   /*   map.addListener("click", (mapsMouseEvent) => {
       // Close the current InfoWindow.
       tooltipInfoWindow.close();
@@ -49,19 +55,38 @@ async function initMap() {
       tooltipInfoWindow.open(map);
     }); */
 
+  map.addListener("click", async (mapsMouseEvent) => {
+    start = mapsMouseEvent.latLng
+    end = mapsMouseEvent.latLng
+
+    modal.classList.add("active")
+  })
+
+  submit_modal.addEventListener("click", (e) => {
+    modal.classList.remove("active")
+
+    calculateAndDisplayRoute(directionsService, directionsRenderer, start, end)
+  })
+
   start_point.addEventListener("click", (e) => {
     map.panTo(start)
   })
   end_point.addEventListener("click", (e) => {
     map.panTo(end)
   })
-  reset_turns.addEventListener("click", (e) => {
-    calculateAndDisplayRoute(directionsService, directionsRenderer)
-  })
 
-  calculateAndDisplayRoute(directionsService, directionsRenderer)
+  directionsRenderer.addListener("directions_changed", () => {
+    const directions = directionsRenderer.getDirections();
 
-  /* Код поисковика */
+    if (directions) {
+      computeTotalDistance(directions);
+    }
+  });
+
+  calculateAndDisplayRoute(directionsService, directionsRenderer, start, end)
+
+  // Дальше идёт код Поисковика
+  // Дальше идёт код Поисковика
 
   const input = document.getElementById("pac-input");
   const options = {
@@ -118,19 +143,21 @@ async function initMap() {
 }
 
 
-
-function calculateAndDisplayRoute(directionsService, directionsRenderer) {
+function calculateAndDisplayRoute(directionsService, directionsRenderer, start, end) {
 
   directionsService
     .route({
       origin: start,
       destination: end,
       travelMode: google.maps.TravelMode.DRIVING,
+      optimizeWaypoints: false,
+      provideRouteAlternatives: false,
     })
     .then((response) => {
       directionsRenderer.setDirections(response);
     })
     .catch((e) => window.alert("Directions request failed due to " + e));
+
 
   submitBtn.addEventListener("click", async (e) => {
     directionsService
@@ -139,12 +166,60 @@ function calculateAndDisplayRoute(directionsService, directionsRenderer) {
         destination: end,
         travelMode: google.maps.TravelMode.DRIVING,
       }).then((res) => {
-        console.log(res)
+        let data = dataProcessing(res)
+        console.log(data)
+        //TODO: Записать полученные данные на сервер.
+        //В переменной data уже все обработанные данные.
 
 
         alert("Данные были отправлены.")
       }).catch((e) => { console.log("Error: " + e) })
   })
+}
+
+close_modal.addEventListener("click", (e) => {
+  modal.classList.remove("active")
+})
+
+function dataProcessing(res) {
+  if (res.status !== "OK") {
+    setTimeout(() =>
+      alert("Ошибка обработки данных, попробуйте ещё раз или сообщите об ошибке.")
+      , 3000
+    )
+  } else {
+    let data = {
+      totalDistance: totalDistance,
+      totalTime: totalTime,
+      start_cord: start_cords,
+      end_cord: end_cords,
+    }
+    return data
+  }
+
+}
+
+function computeTotalDistance(result) {
+  totalDistance = 0;
+  totalTime = 0;
+  const myroute = result.routes[0];
+
+  if (!myroute) {
+    return;
+  }
+
+  for (let i = 0; i < myroute.legs.length; i++) {
+    totalDistance += myroute.legs[i].distance.value;
+    totalTime += myroute.legs[i].duration.value;
+  }
+
+  totalDistance = totalDistance / 1000;
+
+  start_cords = myroute.legs[0].start_address
+  end_cords = myroute.legs[0].end_address
+
+  start = myroute.legs[0].start_location
+  end = myroute.legs[0].end_location
 }
 
 initMap()
