@@ -5,10 +5,9 @@ let totalDistance
 let totalTime
 let start_cords
 let end_cords
+const panel = document.getElementById("panel")
 const start_point = document.getElementById("start_point")
 const end_point = document.getElementById("end_point")
-const reset_turns = document.getElementById("reset_turns")
-const reset_route = document.getElementById("reset_route")
 const submitBtn = document.getElementById("submit")
 let modal = document.getElementById("modal")
 let close_modal = document.getElementById("close_modal")
@@ -31,6 +30,8 @@ async function initMap() {
     zoom: 18,
     disableDefaultUI: true,
   });
+
+  map.controls[google.maps.ControlPosition.TOP_LEFT].push(panel);
 
   directionsRenderer.setMap(map);
 
@@ -167,10 +168,23 @@ function calculateAndDisplayRoute(directionsService, directionsRenderer, start, 
         travelMode: google.maps.TravelMode.DRIVING,
       }).then((res) => {
         let data = dataProcessing(res)
-        console.log(data)
         //TODO: Записать полученные данные на сервер.
+        let options = {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(data) // Convert the JavaScript object to a JSON string
+        };
         //В переменной data уже все обработанные данные.
-
+        fetch('http://127.0.0.1:3000/api/writeData', options)
+          .then(response => response.json())
+          .then(data => {
+            console.log('Success:', data);
+          })
+          .catch((error) => {
+            console.error('Error:', error);
+          });
 
         alert("Данные были отправлены.")
       }).catch((e) => { console.log("Error: " + e) })
