@@ -1,0 +1,23 @@
+{
+  "name": "googlemapsthing",
+  "version": "1.0.0",
+  "description": "",
+  "main": "map.js",
+  "scripts": {
+    "build": "node app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Hron0/GoogleMapsThing.git"
+  },
+  "author": "Hrono",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Hron0/GoogleMapsThing/issues"
+  },
+  "homepage": "https://github.com/Hron0/GoogleMapsThing#readme",
+  "dependencies": {
+    "express": "^4.19.1",
+    "nodemon": "^3.1.0"
+  }
+}
