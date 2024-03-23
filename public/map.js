@@ -150,7 +150,7 @@ function calculateAndDisplayRoute(directionsService, directionsRenderer, start, 
     .route({
       origin: start,
       destination: end,
-      travelMode: google.maps.TravelMode.DRIVING,
+      travelMode: google.maps.TravelMode.WALKING,
       optimizeWaypoints: false,
       provideRouteAlternatives: false,
     })
