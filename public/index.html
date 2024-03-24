@@ -2,10 +2,8 @@
 
 <head>
   <title>Add Map</title>
-  <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
-  <script async
-    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAC7du2JRTuMl8GZPZWzLCX37UXleG7GYk&libraries=places"
-    defer></script>
+  <link href="https://api.mapbox.com/mapbox-gl-js/v3.2.0/mapbox-gl.css" rel="stylesheet">
+  <script src="https://api.mapbox.com/mapbox-gl-js/v3.2.0/mapbox-gl.js"></script>
   <link rel="stylesheet" type="text/css" href="./index.css" />
   <script type="module" src="./map.js"></script>
 </head>
@@ -25,16 +23,22 @@
       <span id="place-address"></span>
     </div>
   </div>
-  <div id="map"></div>
-  <h1 class="error_msg">Если вы видите это сообщение, значит карта не загрузилась, попробуйте перезагрузить страницу (возможно несколько раз). Если проблема не ичезнет сообщите нам об ошибке</h1>
-  <div class="modal" id="modal">
-    <h1>Переустановить точки маршрута?</h1>
-    <div class="modal_nav">
-      <button id="close_modal">Отмена</button>
-      <button id="submit_modal">Подтвердить</button>
-    </div>
-  </div>
-  <script src="https://polyfill.io/v3/polyfill.min.js?features=default" defer></script>
+
+
+  <div id='map' style='width: 400px; height: 300px;'></div>
+  <script>
+    // TO MAKE THE MAP APPEAR YOU MUST
+    // ADD YOUR ACCESS TOKEN FROM
+    // https://account.mapbox.com
+    mapboxgl.accessToken = '<your access token here>';
+    const map = new mapboxgl.Map({
+      container: 'map', // container ID
+      style: 'mapbox://styles/mapbox/streets-v12', // style URL
+      center: [-74.5, 40], // starting position [lng, lat]
+      zoom: 9, // starting zoom
+    });
+  </script>
+
 </body>
 
 
