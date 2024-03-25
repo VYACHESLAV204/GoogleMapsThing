@@ -132,7 +132,7 @@ const initMap = () => {
 
 
   function updateRoute() {
-    const profile = 'driving';
+    const profile = 'walking';
     const data = draw.getAll();
     const lastFeature = data.features.length - 1;
     const coords = data.features[lastFeature].geometry.coordinates;
