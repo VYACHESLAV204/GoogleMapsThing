@@ -1,41 +1,26 @@
+<!DOCTYPE html>
 <html>
 
 <head>
-  <title>Add Map</title>
-  <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
-  <script async
-    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAC7du2JRTuMl8GZPZWzLCX37UXleG7GYk&libraries=places"
-    defer></script>
-  <link rel="stylesheet" type="text/css" href="./index.css" />
-  <script type="module" src="./map.js"></script>
+    <meta charset="utf-8">
+    <title>Display a map on a webpage</title>
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+    <link href="https://api.mapbox.com/mapbox-gl-js/v3.2.0/mapbox-gl.css" rel="stylesheet">
+    <script id="search-js" defer="" src="https://api.mapbox.com/search-js/v1.0.0-beta.19/web.js"></script>
+    <script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.0.9/mapbox-gl-draw.js'></script>
+    <link rel='stylesheet' href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.0.9/mapbox-gl-draw.css'
+        type='text/css' />
+    <script src="https://api.mapbox.com/mapbox-gl-js/v3.2.0/mapbox-gl.js"></script>
+    <link rel="stylesheet" href="index.css">
 </head>
 
 <body>
-  <div class="panel" id="panel">
-    <div class="nav_container">
-      <button id="start_point">К нач. точке</button>
-      <button id="end_point">К конеч. точке</button>
-      <button id="submit">Отправить Данные</button>
-    </div>
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet">
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
 
-    <input id="pac-input" type="text" placeholder="Поиск улиц/мест." />
+    <div id="map"></div>
 
-    <div id="infowindow-content">
-      <span id="place-name" class="title"></span><br />
-      <span id="place-address"></span>
-    </div>
-  </div>
-  <div id="map"></div>
-  <h1 class="error_msg">Если вы видите это сообщение, значит карта не загрузилась, попробуйте перезагрузить страницу (возможно несколько раз). Если проблема не ичезнет сообщите нам об ошибке</h1>
-  <div class="modal" id="modal">
-    <h1>Переустановить точки маршрута?</h1>
-    <div class="modal_nav">
-      <button id="close_modal">Отмена</button>
-      <button id="submit_modal">Подтвердить</button>
-    </div>
-  </div>
-  <script src="https://polyfill.io/v3/polyfill.min.js?features=default" defer></script>
+    <script src="map.js"></script>
 </body>
-
 
 </html>

@@ -14,6 +14,7 @@ app.get('/', async (req, res) => {
 
 app.post('/api/writeData', async (req, res) => {
     let currentData = fs.readFileSync('data.json')
+    // @ts-ignore
     let jsonData = JSON.parse(currentData)
 
     const requestJson = JSON.stringify(req.body)

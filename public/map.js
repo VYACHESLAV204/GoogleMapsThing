@@ -1,148 +1,188 @@
 //@ts-nocheck
 /* Да, всё этого пиздец как плохо выглядит */
 let map;
-let totalDistance
-let totalTime
-let start_cords
-let end_cords
-const panel = document.getElementById("panel")
-const start_point = document.getElementById("start_point")
-const end_point = document.getElementById("end_point")
-const submitBtn = document.getElementById("submit")
-let modal = document.getElementById("modal")
-let close_modal = document.getElementById("close_modal")
-let submit_modal = document.getElementById("submit_modal")
 
-let start = { lat: 56.82919264514929, lng: 60.58379842794948 };
-let end = { lat: 56.82953942977743, lng: 60.59075440792031 };
-
-async function initMap() {
-  const { Map } = await google.maps.importLibrary("maps");
-  const directionsService = new google.maps.DirectionsService();
-  let directionsRenderer = new google.maps.DirectionsRenderer({
-    draggable: true,
-    map,
-  });
-  const defPos = { lat: 56.82955293942959, lng: 60.58714032665389 }
-
-  map = new Map(document.getElementById("map"), {
-    center: defPos,
-    zoom: 18,
-    disableDefaultUI: true,
+const initMap = () => {
+  const ACCESS_TOKEN = 'pk.eyJ1IjoiYWxleGFuZGVybWFya292IiwiYSI6ImNsdTVibG8zNTB1cDIyam40Y3Nnc2JibTgifQ.-PRze3fjfRYyKtJcXcpJPQ';
+  mapboxgl.accessToken = 'pk.eyJ1IjoiYWxleGFuZGVybWFya292IiwiYSI6ImNsdTVibG8zNTB1cDIyam40Y3Nnc2JibTgifQ.-PRze3fjfRYyKtJcXcpJPQ';
+  const map = new mapboxgl.Map({
+    container: 'map',
+    style: 'mapbox://styles/mapbox/streets-v12',
+    center: [30.313572325520312, 59.936930470787075], // starting position
+    zoom: 16
   });
 
-  map.controls[google.maps.ControlPosition.TOP_LEFT].push(panel);
 
-  directionsRenderer.setMap(map);
-
-  let tooltipInfoWindow = new google.maps.InfoWindow({
-    content: "Укажите начальную и конечную точки маршрута нажимая на дорогу, появятся 2 маркера которые можно перетаскивать: маркер \"A\" - Начало маршрута, маркер \"В\" - конец маршрута. Для изменения пути маршрута нажмите на его линию, и перетащите появившеюся точку на нужный вам поворот. Так можно делать сколько угодно раз. После нажмите кнопку \"Отправить Данные\" в верхнем правом углу.",
-    position: defPos,
-  });
-
-  tooltipInfoWindow.open(map);
-  // Слушатель кликов для отображения координатов
-  // Лучше оставить, закоментированным конечно, может ещё пригодиться.
-  /*   map.addListener("click", (mapsMouseEvent) => {
-      // Close the current InfoWindow.
-      tooltipInfoWindow.close();
-      // Create a new InfoWindow.
-      tooltipInfoWindow = new google.maps.InfoWindow({
-        position: mapsMouseEvent.latLng,
-      });
-      tooltipInfoWindow.setContent(
-        JSON.stringify(mapsMouseEvent.latLng.toJSON(), null, 2),
-      );
-      tooltipInfoWindow.open(map);
-    }); */
-
-  map.addListener("click", async (mapsMouseEvent) => {
-    start = mapsMouseEvent.latLng
-    end = mapsMouseEvent.latLng
-
-    modal.classList.add("active")
-  })
-
-  submit_modal.addEventListener("click", (e) => {
-    modal.classList.remove("active")
-
-    calculateAndDisplayRoute(directionsService, directionsRenderer, start, end)
-  })
-
-  start_point.addEventListener("click", (e) => {
-    map.panTo(start)
-  })
-  end_point.addEventListener("click", (e) => {
-    map.panTo(end)
-  })
-
-  directionsRenderer.addListener("directions_changed", () => {
-    const directions = directionsRenderer.getDirections();
-
-    if (directions) {
-      computeTotalDistance(directions);
-    }
-  });
-
-  calculateAndDisplayRoute(directionsService, directionsRenderer, start, end)
-
-  // Дальше идёт код Поисковика
-  // Дальше идёт код Поисковика
-
-  const input = document.getElementById("pac-input");
-  const options = {
-    fields: ["formatted_address", "geometry", "name"],
-    strictBounds: false,
+  /* Поисковик */
+  const searchJS = document.getElementById('search-js');
+  searchJS.onload = function () {
+    const searchBox = new MapboxSearchBox();
+    searchBox.accessToken = ACCESS_TOKEN;
+    searchBox.options = {
+      types: 'address,poi,street,place,block',
+      county: 'ru',
+    };
+    searchBox.marker = true;
+    searchBox.mapboxgl = mapboxgl;
+    map.addControl(searchBox);
   };
 
-  const autocomplete = new google.maps.places.Autocomplete(input, options);
+  /* Маркер с инфой */
+  var popup = new mapboxgl.Popup({ offset: 25 })
+    .setText("Для размещения маршрута нажимайте ЛКМ размещая точки последовательно, после нажмите на последнюю точку. Это создаст маршрут. Нажав на опорную точку выберется весь маршрут, в этом состояние можно перетаскивать любую из точек, корректируя маршрут. Также маршрут можно удалить, выбрав его и нажав кнопку в Верхнем Правом углу. Сверху справа так же есть Поисковик и Кнопки: Создания нового маршрута, Удаления Выбранного маршрута. После того как вы сделали маршрут, нажмите кнопку \"Отправить данные\"")
 
-  // Bind the map's bounds (viewport) property to the autocomplete object,
-  // so that the autocomplete requests use the current map bounds for the
-  // bounds option in the request.
-  autocomplete.bindTo("bounds", map);
+  var marker = new mapboxgl.Marker()
+    .setLngLat([30.313572325520312, 59.936930470787075]) // replace with your coordinates
+    .setPopup(popup)
+    .addTo(map)
+    .togglePopup();
 
-  const placeInfoWindow = new google.maps.InfoWindow();
-  const infowindowContent = document.getElementById("infowindow-content");
 
-  placeInfoWindow.setContent(infowindowContent);
-
-  const placeMarker = new google.maps.Marker({
-    map,
-    anchorPoint: new google.maps.Point(0, -29),
+  /* Рисование (без путей) */
+  const draw = new MapboxDraw({
+    // Instead of showing all the draw tools, show only the line string and delete tools.
+    displayControlsDefault: false,
+    controls: {
+      line_string: true,
+      trash: true
+    },
+    // Set the draw mode to draw LineStrings by default.
+    defaultMode: 'draw_line_string',
+    styles: [
+      // Set the line style for the user-input coordinates.
+      {
+        id: 'gl-draw-line',
+        type: 'line',
+        filter: ['all', ['==', '$type', 'LineString'], ['!=', 'mode', 'static']],
+        layout: {
+          'line-cap': 'round',
+          'line-join': 'round'
+        },
+        paint: {
+          'line-color': '#438EE4',
+          'line-dasharray': [0.2, 2],
+          'line-width': 4,
+          'line-opacity': 0.7
+        }
+      },
+      // Style the vertex point halos.
+      {
+        id: 'gl-draw-polygon-and-line-vertex-halo-active',
+        type: 'circle',
+        filter: [
+          'all',
+          ['==', 'meta', 'vertex'],
+          ['==', '$type', 'Point'],
+          ['!=', 'mode', 'static']
+        ],
+        paint: {
+          'circle-radius': 12,
+          'circle-color': '#FFF'
+        }
+      },
+      // Style the vertex points.
+      {
+        id: 'gl-draw-polygon-and-line-vertex-active',
+        type: 'circle',
+        filter: [
+          'all',
+          ['==', 'meta', 'vertex'],
+          ['==', '$type', 'Point'],
+          ['!=', 'mode', 'static']
+        ],
+        paint: {
+          'circle-radius': 8,
+          'circle-color': '#438EE4'
+        }
+      }
+    ]
   });
+  map.addControl(draw);
 
-  autocomplete.addListener("place_changed", () => {
-    placeInfoWindow.close();
-    placeMarker.setVisible(false);
 
-    const place = autocomplete.getPlace();
+  /* Запрос на отрисовку путей */
+  function addRoute(coords) {
+    if (map.getSource('route')) {
+      map.removeLayer('route');
+      map.removeSource('route');
+    } else {
+      map.addLayer({
+        id: 'route',
+        type: 'line',
+        source: {
+          type: 'geojson',
+          data: {
+            type: 'Feature',
+            properties: {},
+            geometry: coords
+          }
+        },
+        layout: {
+          'line-join': 'round',
+          'line-cap': 'round'
+        },
+        paint: {
+          'line-color': '#03AA46',
+          'line-width': 8,
+          'line-opacity': 0.8
+        }
+      });
+    }
+  }
 
-    if (!place.geometry || !place.geometry.location) {
-      // User entered the name of a Place that was not suggested and
-      // pressed the Enter key, or the Place Details request failed.
-      window.alert("No details available for input: '" + place.name + "'");
+
+  function updateRoute() {
+    const profile = 'driving';
+    const data = draw.getAll();
+    const lastFeature = data.features.length - 1;
+    const coords = data.features[lastFeature].geometry.coordinates;
+    const newCoords = coords.join(';');
+    const radius = coords.map(() => 25);
+
+    getMatch(newCoords, radius, profile);
+  }
+
+
+
+  async function getMatch(coordinates, radius, profile) {
+    const radiuses = radius.join(';');
+    const query = await fetch(
+      `https://api.mapbox.com/matching/v5/mapbox/${profile}/${coordinates}?geometries=geojson&radiuses=${radiuses}&steps=true&access_token=${mapboxgl.accessToken}`,
+      { method: 'GET' }
+    );
+    const response = await query.json();
+    if (response.code !== 'Ok') {
+      alert(
+        `${response.code} - ${response.message}.\n\nFor more information: https://docs.mapbox.com/api/navigation/map-matching/#map-matching-api-errors`
+      );
       return;
     }
+    const coords = response.matchings[0].geometry;
+    addRoute(coords);
+  }
 
-    map.setCenter(place.geometry.location);
-    map.setZoom(18);
 
-    placeMarker.setPosition(place.geometry.location);
-    placeMarker.setVisible(true);
-    infowindowContent.children["place-name"].textContent = place.name;
-    infowindowContent.children["place-address"].textContent =
-      place.formatted_address;
-    placeInfoWindow.open(map, placeMarker);
-  });
+  /* Удаление всех путей */
+  function removeRoute() {
+    if (!map.getSource('route')) return;
+    map.removeLayer('route');
+    map.removeSource('route');
+  }
 
-  map.addListener("drag", (mapsMouseEvent) => {
-    placeInfoWindow.close();
-    placeMarker.setVisible(false);
-  })
+  map.on('draw.delete', removeRoute);
+  map.on('draw.create', updateRoute);
+  map.on('draw.update', updateRoute);
+
+
+  /* const addMarker = (e) => {
+    console.log(e)
+  }
+
+  map.on('click', addMarker) */
 
 }
 
+initMap()
 
 function calculateAndDisplayRoute(directionsService, directionsRenderer, start, end) {
 
@@ -191,9 +231,6 @@ function calculateAndDisplayRoute(directionsService, directionsRenderer, start, 
   })
 }
 
-close_modal.addEventListener("click", (e) => {
-  modal.classList.remove("active")
-})
 
 function dataProcessing(res) {
   if (res.status !== "OK") {
@@ -235,5 +272,3 @@ function computeTotalDistance(result) {
   start = myroute.legs[0].start_location
   end = myroute.legs[0].end_location
 }
-
-initMap()
