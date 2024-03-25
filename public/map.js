@@ -1,6 +1,7 @@
 //@ts-nocheck
 /* Да, всё этого пиздец как плохо выглядит */
 let map;
+let cordsG, radiusG, profileG
 
 const initMap = () => {
   const ACCESS_TOKEN = 'pk.eyJ1IjoiYWxleGFuZGVybWFya292IiwiYSI6ImNsdTVibG8zNTB1cDIyam40Y3Nnc2JibTgifQ.-PRze3fjfRYyKtJcXcpJPQ';
@@ -29,7 +30,7 @@ const initMap = () => {
 
   /* Маркер с инфой */
   var popup = new mapboxgl.Popup({ offset: 25 })
-    .setText("Для размещения маршрута нажимайте ЛКМ размещая точки последовательно, после нажмите на последнюю точку. Это создаст маршрут. Нажав на опорную точку выберется весь маршрут, в этом состояние можно перетаскивать любую из точек, корректируя маршрут. Также маршрут можно удалить, выбрав его и нажав кнопку в Верхнем Правом углу. Сверху справа так же есть Поисковик и Кнопки: Создания нового маршрута, Удаления Выбранного маршрута. После того как вы сделали маршрут, нажмите кнопку \"Отправить данные\"")
+    .setText("Для размещения маршрута нажимайте ЛКМ размещая точки последовательно, после нажмите на последнюю точку. Это создаст маршрут. Нажав на опорную точку выберется весь маршрут, в этом состояние можно перетаскивать любую из точек, корректируя маршрут. Также маршрут можно удалить, выбрав его и нажав кнопку в Верхнем Правом углу. Сверху справа так же есть Поисковик и Кнопки: Создания нового маршрута, Удаления Выбранного маршрута. После того как вы сделали маршрут, нажмите кнопку \"Отправить данные\" в Верхнем Левом углу.")
 
   var marker = new mapboxgl.Marker()
     .setLngLat([30.313572325520312, 59.936930470787075]) // replace with your coordinates
@@ -139,11 +140,15 @@ const initMap = () => {
     const newCoords = coords.join(';');
     const radius = coords.map(() => 25);
 
+    cordsG = newCoords
+    radiusG = radius
+    profileG = profile
+
     getMatch(newCoords, radius, profile);
   }
 
 
-
+  /* Запрос и вывод марг */
   async function getMatch(coordinates, radius, profile) {
     const radiuses = radius.join(';');
     const query = await fetch(
@@ -161,6 +166,22 @@ const initMap = () => {
     addRoute(coords);
   }
 
+  async function displayRoute(url) {
+    const radiuses = radiusG.join(';');
+    const query = await fetch(
+      `${url}`,
+      { method: 'GET' }
+    );
+    const response = await query.json();
+    if (response.code !== 'Ok') {
+      alert(
+        `${response.code} - ${response.message}.\n\nFor more information: https://docs.mapbox.com/api/navigation/map-matching/#map-matching-api-errors`
+      );
+      return;
+    }
+    const coords = response.matchings[0].geometry;
+    addRoute(coords);
+  }
 
   /* Удаление всех путей */
   function removeRoute() {
@@ -174,76 +195,80 @@ const initMap = () => {
   map.on('draw.update', updateRoute);
 
 
+  class MyCustomControl {
+    onAdd(map) {
+      this.map = map;
+      this.container = document.createElement('div');
+      this.container.className = 'mapboxgl-ctrl mapboxgl-ctrl-group';
+      this.container.innerHTML = `
+      <button class="mapbox-gl-draw_ctrl-draw-btn active submit-control" id="submit_data">
+        Отправить данные
+        </button>
+      `
+      return this.container;
+    }
+    onRemove() {
+      this.container.parentNode.removeChild(this.container);
+      this.map = undefined;
+    }
+  }
+
+  const myCustomControl = new MyCustomControl();
+
+  map.addControl(myCustomControl, 'top-left');
+
   /* const addMarker = (e) => {
     console.log(e)
   }
-
+ 
   map.on('click', addMarker) */
+  const submit_data_btn = document.getElementById("submit_data")
+  submit_data_btn.addEventListener("click", async () => {
+    let radiuses = radiusG.join(';');
 
+    await fetch(
+      `https://api.mapbox.com/matching/v5/mapbox/${profileG}/${cordsG}?geometries=geojson&radiuses=${radiuses}&steps=true&overview=full&annotations=distance&access_token=${mapboxgl.accessToken}`,
+      { method: 'GET' }
+    ).then(async (res) => {
+      let data = dataProcessing(res)
+      console.log(data)
+
+      //TODO: Записать полученные данные на сервер.
+      let options = {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data) // Convert the JavaScript object to a JSON string
+      };
+      //В переменной data уже все обработанные данные.
+      fetch('http://127.0.0.1:3000/api/writeData', options)
+        .then(response => response.json())
+        .then(data => {
+          console.log('Success:', data);
+        })
+        .catch((error) => {
+          console.error('Error:', error);
+        });
+
+      alert("Данные были отправлены.")
+    }).catch((e) => { console.log("Error: " + e) })
+  })
 }
 
 initMap()
 
-function calculateAndDisplayRoute(directionsService, directionsRenderer, start, end) {
-
-  directionsService
-    .route({
-      origin: start,
-      destination: end,
-      travelMode: google.maps.TravelMode.WALKING,
-      optimizeWaypoints: false,
-      provideRouteAlternatives: false,
-    })
-    .then((response) => {
-      directionsRenderer.setDirections(response);
-    })
-    .catch((e) => window.alert("Directions request failed due to " + e));
-
-
-  submitBtn.addEventListener("click", async (e) => {
-    directionsService
-      .route({
-        origin: start,
-        destination: end,
-        travelMode: google.maps.TravelMode.DRIVING,
-      }).then((res) => {
-        let data = dataProcessing(res)
-        //TODO: Записать полученные данные на сервер.
-        let options = {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(data) // Convert the JavaScript object to a JSON string
-        };
-        //В переменной data уже все обработанные данные.
-        fetch('http://127.0.0.1:3000/api/writeData', options)
-          .then(response => response.json())
-          .then(data => {
-            console.log('Success:', data);
-          })
-          .catch((error) => {
-            console.error('Error:', error);
-          });
-
-        alert("Данные были отправлены.")
-      }).catch((e) => { console.log("Error: " + e) })
-  })
-}
 
 
 function dataProcessing(res) {
-  if (res.status !== "OK") {
+  if (res.statusText !== "OK") {
     setTimeout(() =>
       alert("Ошибка обработки данных, попробуйте ещё раз или сообщите об ошибке.")
       , 3000
     )
   } else {
     let data = {
-      totalDistance: totalDistance,
-      totalTime: totalTime,
-      start_cord: start_cords,
-      end_cord: end_cords,
+      url: res.url
     }
     return data
   }

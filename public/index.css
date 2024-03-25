@@ -46,3 +46,19 @@ body {
     font-size: 1.3rem !important;
     padding: 1px 5px !important;
 }
+
+.submit-control{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    padding: 2px 10px !important;
+    width: auto !important;
+    background-color: #ffffff !important;
+    font-weight: 600 !important;
+}
+
+.submit-control:hover{
+    padding: 4px 14px !important;
+    font-weight: 800 !important;
+}
