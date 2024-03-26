@@ -261,6 +261,8 @@ initMap()
 
 
 function dataProcessing(res) {
+  slicedData = res.url.slice(50, -203)
+
   if (res.statusText !== "OK") {
     setTimeout(() =>
       alert("Ошибка обработки данных, попробуйте ещё раз или сообщите об ошибке.")
@@ -269,7 +271,8 @@ function dataProcessing(res) {
   } else {
     let data = {
       url: res.url,
-      cords: res.url.slice(50, -203),
+      cords: slicedData,
+      cordsArray: slicedData.split(';')
     }
     return data
   }
