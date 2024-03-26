@@ -8,6 +8,16 @@ const dataFilePath = './data.json';
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json())
 
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Headers', 'Content-Type,Authorization');
+  res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE');
+  if (req.method === 'OPTIONS') {
+    return res.send(200);
+  }
+  next();
+});
+
 app.get('/', async (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
