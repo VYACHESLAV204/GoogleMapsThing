@@ -268,7 +268,8 @@ function dataProcessing(res) {
     )
   } else {
     let data = {
-      url: res.url
+      url: res.url,
+      cords: res.url.slice(50, -203),
     }
     return data
   }
