@@ -1,0 +1,209 @@
+#messages {
+	list-style-type: none;
+	height: 450px;
+	overflow-y: scroll;
+	padding-left: 28px;
+	padding-right: 28px;
+	padding-top: 20px;
+}
+
+.MyMessage {
+	color: #bababa;
+	margin-bottom: 12px;
+	font-size: 22px;
+	max-width: 180px;
+	max-height: 300px;
+	text-wrap: wrap;
+	background: #1f1f1f;
+	display: flex;
+	flex-wrap: wrap;
+	flex-direction: column;
+	padding: 10px;
+	display: flex;
+	border-radius: 15px;
+	align-items: center;
+	justify-content: center;
+	word-break: break-all;
+}
+
+.OthereMessage {
+	color: #bababa;
+	margin-bottom: 12px;
+	font-size: 22px;
+	max-width: 180px;
+	max-height: 300px;
+	text-wrap: wrap;
+	background: #830ef7;
+	flex-wrap: wrap;
+	padding: 10px;
+	display: flex;
+	border-radius: 15px;
+	align-items: center;
+	justify-content: center;
+	word-break: break-all;
+	position: relative;
+	left: 130px;
+}
+
+.position-container {
+	position: fixed;
+	top: 10vh;
+	z-index: 999;
+	left: 30vw;
+	width: 390px;
+	background: linear-gradient(353deg,
+			rgb(0 0 0) 0%,
+			rgb(62 4 127) 87%,
+			rgba(124, 1, 246, 1) 100%);
+	height: 640px;
+	border-radius: 20px;
+	border: 1px solid black;
+}
+
+#fileInput {
+	position: relative;
+	left: 1000px;
+	visibility: hidden;
+}
+
+h3 {
+	text-align: center;
+}
+
+img {
+	width: 30px;
+	height: 30px;
+}
+
+.inputs-container {
+	display: flex;
+
+	width: 95%;
+}
+
+form {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	display: flex;
+	padding: 10px;
+}
+
+.form-container {
+	position: absolute;
+	top: 543px;
+	height: 100px;
+	width: 390px;
+
+	display: flex;
+
+	background: radial-gradient(2430.67% 145.26% at -8.97% 88.24%,
+			rgb(31, 31, 31) 0%,
+			rgb(31, 31, 31) 100%);
+	align-items: center;
+	border-radius: 0px 0px 20px 20px;
+}
+
+#messageText {
+	border-radius: 10px;
+	padding: 8px 20px;
+	width: 246px;
+	height: 50px;
+	color: #bababa;
+	background: #272626;
+}
+
+.fileInputLabel {
+	margin-right: 5px;
+	display: flex;
+	justify-content: center;
+	margin-top: 5px;
+	align-items: center;
+}
+
+button {
+	border: 0px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+ul {
+	padding-inline-start: 0px;
+}
+
+.sendButton {
+	background: radial-gradient(2430.67% 145.26% at -8.97% 88.24%,
+			rgb(31, 31, 31) 0%,
+			rgb(31, 31, 31) 100%);
+	width: 30px;
+	height: 30px;
+	margin-left: 7px;
+	margin-top: 5px;
+}
+
+.headercontainer {
+	padding: 2px 10px;
+	box-sizing: border-box;
+	width: 390px;
+	height: 75px;
+	border-radius: 20px 20px 0px 0px;
+	background: linear-gradient(40deg, #1f1f1f 0%, #1f1f1f 100%);
+}
+
+#ws-id {
+	font-weight: 700;
+	font-size: 22px;
+	text-align: center;
+	color: #c8c8c8;
+}
+
+h3 {
+	font-weight: 700;
+	font-size: 22px;
+	text-align: center;
+	color: #c8c8c8;
+}
+
+/* хром, сафари */
+#messages::-webkit-scrollbar {
+	width: 0;
+}
+
+/* ie 10+ */
+#messages {
+	-ms-overflow-style: none;
+}
+
+/* фф (свойство больше не работает, других способов тоже нет)*/
+#messages {
+	overflow: -moz-scrollbars-none;
+}
+
+.OthereMessage>button {
+	width: 120px;
+	border: 0px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	margin-top: 5px;
+	height: 40px;
+	border-radius: 20px;
+	background-color: #ffffff;
+	font-size: 20px;
+	font-weight: 500;
+}
+
+.MyMessage>button {
+	width: 120px;
+	border: 0px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	margin-top: 5px;
+	height: 40px;
+	border-radius: 20px;
+	background-color: #830ef7;
+	font-size: 20px;
+	font-weight: 500;
+}
