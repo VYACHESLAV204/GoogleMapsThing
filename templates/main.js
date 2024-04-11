@@ -1,3 +1,15 @@
+var cssId = 'myCss';  // you could encode the css path itself to generate id..
+if (!document.getElementById(cssId))
+{
+    var head  = document.getElementsByTagName('head')[0];
+    var link  = document.createElement('link');
+    link.id   = cssId;
+    link.rel  = 'stylesheet';
+    link.type = 'text/css';
+    link.href = 'styles.css';
+    link.media = 'all';
+    head.appendChild(link);
+}
 // получить id из url
 let scriptSource = (function() {
     var scripts = document.getElementsByTagName('script'),
@@ -39,7 +51,7 @@ container.innerHTML =
     let myId =document.querySelector("#ws-id")
     myId.textContent = client_id;
     let ws = new WebSocket('ws://localhost:8000/chat/ws/client/' + client_id);
-    ws.binaryType = 'arraybuffer'
+    
     // Действия при получении сообщении. 
     ws.onmessage = function(event) {
     let fileData = event.data.split(': ');
@@ -94,7 +106,7 @@ messages.scrollTop = messages.scrollHeight - messages.clientHeight;
 };
     function sendMessage(event) {
         let input = document.getElementById("messageText")
-        ws.send(input.value)
+        ws.send(JSON.stringify(input.value))
         input.value = ''
        
         event.preventDefault()

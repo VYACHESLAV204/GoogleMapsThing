@@ -1,7 +1,5 @@
-from http.client import HTTPException
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi import (
-    Response,
     WebSocket,
     WebSocketDisconnect,
     status,
@@ -27,22 +25,17 @@ file_name: str = None
 chats = []
 
 
-@router.get("/get_chats/{secret_key}")
-async def get_chats(secret_key: str):
-    if secret_key == KEY:
-
+@router.get("/get_chats/{key}")
+async def get_chats(key: str):
+    if KEY == key:
         global chats
         users = await admin_manager.get_users()  # Get the list of chats
         return JSONResponse(content={"data": users})
-    else:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Key is invalid "
-        )
 
 
-@router.get("/set_current_chat/{user_id}/{secret_key}")
-async def set_current_chat(user_id: int, secret_key: str):
-    if secret_key == KEY:
+@router.get("/set_current_chat/{user_id}/{key}")
+async def set_current_chat(user_id: int, key: str):
+    if KEY == key:
         global current_user_id
         current_user_id = user_id
         messages = await admin_manager.get_message_story(message_for=current_user_id)
@@ -51,35 +44,34 @@ async def set_current_chat(user_id: int, secret_key: str):
                 message.message, message_for=current_user_id
             )
         return current_user_id
-    else:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Key is invalid "
-        )
 
 
-@router.websocket("/ws/admin/{secret_key}")
-async def admin_websocket_endpoint(websocket: WebSocket, secret_key: str):
+@router.websocket("/ws/admin/{key}")
+async def admin_websocket_endpoint(websocket: WebSocket, key: str):
     await admin_manager.connect_admin(websocket)
-    if secret_key == KEY:
+    if KEY == key:
+
         try:
             while True:
                 message = await websocket.receive()
                 if message["type"] == "websocket.disconnect":
                     break
-            if "bytes" in message and message["bytes"] is not None:
-                print("bytes")
-                await save_file(message["bytes"], file_name=file_name)
-                await admin_manager.send_message_to_user(
-                    f"Client #{1} uploaded a file: {file_name}",
-                    message_for=current_user_id,
-                )
-            else:
+                if "bytes" in message and message["bytes"] is not None:
+                    print("bytes")
+                    await save_file(message["bytes"], file_name=file_name)
+                    await admin_manager.send_message_to_user(
+                        f"Client #{1} uploaded a file: {file_name}",
+                        message_for=current_user_id,
+                    )
+                else:
 
-                await admin_manager.send_message_to_user(
-                    f"Client #{1} says: {message}", message_for=current_user_id
-                )
+                    await admin_manager.send_message_to_user(
+                        f"Client #{1} says: {message}", message_for=current_user_id
+                    )
         except WebSocketDisconnect:
             await admin_manager.disconnect_admin()
+    else:
+        await websocket.close(code=status.HTTP_401_UNAUTHORIZED)
 
 
 @router.websocket("/ws/client/{client_id}")
@@ -90,6 +82,7 @@ async def client_websocket_endpoint(websocket: WebSocket, client_id: int):
     try:
         while True:
             message = await websocket.receive()
+            
             if message["type"] == "websocket.disconnect":
                 break
             if "bytes" in message and message["bytes"] is not None:
